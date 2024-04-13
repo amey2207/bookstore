@@ -68,18 +68,37 @@ def main():
 
     if option == "Home":
         st.write("Welcome to the Bookstore!")
+        st.write("Check out these featured books:")
+        bookstore.display_books()
     elif option == "Search":
-        title = st.text_input("Enter the title of the book you want to search for:")
+        st.header("Search for a Book")
+        search_options = ["Title", "Author", "Genre"]
+        search_type = st.selectbox("Search by", search_options)
+        query = st.text_input(f"Enter the {search_type.lower()} of the book you want to search for:")
         if st.button("Search"):
-            book = bookstore.search_book(title)
-            if book:
-                st.write(f"{book.title} by {book.author} - {book.genre} (${book.price})")
-            else:
-                st.write("Book not found!")
+            if search_type == "Title":
+                book = bookstore.search_book(query)
+                if book:
+                    st.write(f"{book.title} by {book.author} - {book.genre} (${book.price})")
+                    if st.button("Add to Cart"):
+                        shopping_cart.add_to_cart(book)
+                        st.success("Book added to cart!")
+                else:
+                    st.error("Book not found!")
+            elif search_type == "Author":
+                # Search by author logic
+                pass
+            elif search_type == "Genre":
+                # Search by genre logic
+                pass
     elif option == "View Cart":
+        st.header("Shopping Cart")
         shopping_cart.display_cart()
     elif option == "Place Order":
-        shopping_cart.place_order()
+        st.header("Place Your Order")
+        shopping_cart.display_cart()
+        if st.button("Place Order"):
+            shopping_cart.place_order()
 
 if __name__ == "__main__":
     main()
