@@ -68,27 +68,18 @@ def main():
 
     if option == "Home":
         st.write("Welcome to the Bookstore!")
-        st.write("Select an option from the sidebar.")
     elif option == "Search":
-        st.header("Search for a Book")
         title = st.text_input("Enter the title of the book you want to search for:")
         if st.button("Search"):
             book = bookstore.search_book(title)
             if book:
                 st.write(f"{book.title} by {book.author} - {book.genre} (${book.price})")
-                if st.button("Add to Cart"):
-                    shopping_cart.add_to_cart(book)
-                    st.success("Book added to cart!")
             else:
-                st.error("Book not found!")
+                st.write("Book not found!")
     elif option == "View Cart":
-        st.header("Shopping Cart")
         shopping_cart.display_cart()
     elif option == "Place Order":
-        st.header("Place Your Order")
-        shopping_cart.display_cart()
-        if st.button("Place Order"):
-            shopping_cart.place_order()
+        shopping_cart.place_order()
 
 if __name__ == "__main__":
     main()
