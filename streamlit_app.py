@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 # Sample data for books
 books_data = [
@@ -8,6 +9,9 @@ books_data = [
     {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "Classic", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
     # Add more books here...
 ]
+
+# Payment methods
+payment_methods = ["Credit Card", "Debit Card", "PayPal"]
 
 class Book:
     def __init__(self, title, author, genre, price, image_url):
@@ -35,12 +39,19 @@ class Bookstore:
             st.write("No books in the store yet!")
             return
         st.write("Books available in the store:")
-        for book in self.books:
-            st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
-            if st.button(f"Add to Cart: {book.title}"):
-                st.session_state.shopping_cart.append(book)
-                st.experimental_set_query_params(view="cart")
-                st.success(f"{book.title} added to cart!")
+        num_books = len(self.books)
+        num_rows = (num_books + 3) // 4
+        for i in range(num_rows):
+            cols = st.columns(4)
+            for j in range(4):
+                idx = i * 4 + j
+                if idx < num_books:
+                    cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
+                    with cols[j]:
+                        if st.button(f"Add to Cart: {self.books[idx].title}"):
+                            st.session_state.shopping_cart.append(self.books[idx])
+                            st.experimental_set_query_params(view="cart")
+                            st.success(f"{self.books[idx].title} added to cart!")
 
 class ShoppingCart:
     def __init__(self):
@@ -58,15 +69,14 @@ class ShoppingCart:
     def place_order(self):
         total = sum(book.price for book in st.session_state.shopping_cart)
         st.write(f"Total amount to pay: ${total}")
-        confirm = st.radio("Confirm order?", ("Yes", "No"))
-        if confirm == "Yes":
+        payment_method = st.selectbox("Select Payment Method", payment_methods)
+        st.write(f"Payment method: {payment_method}")
+        if st.button("Place Order"):
             st.write("Order placed successfully!")
             st.session_state.shopping_cart = []
-        else:
-            st.write("Order canceled.")
 
 def main():
-    st.title("Bookchor")
+    st.title("Bookstore")
 
     # Initialize shopping cart
     if "shopping_cart" not in st.session_state:
@@ -84,12 +94,12 @@ def main():
         st.header("Shopping Cart")
         shopping_cart = ShoppingCart()
         shopping_cart.display_cart()
-        if st.button("Place Order"):
-            shopping_cart.place_order()
+        shopping_cart.place_order()  # Display place order option
     else:
-        st.header("Welcome to Bookchor")
+        st.header("Welcome to Bookstore")
         bookstore = Bookstore()
-        for book_data in books_data:
+        for _ in range(20):
+            book_data = random.choice(books_data)
             book = Book(**book_data)
             bookstore.add_book(book)
         bookstore.display_books()
