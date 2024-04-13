@@ -33,9 +33,9 @@ class Bookstore:
 
     def display_books(self):
         st.write("Books available in the store:")
-        for book in self.books:
+        for i, book in enumerate(self.books):
             st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
-            if st.button(f"Add to Cart: {book.title}"):
+            if st.button(f"Add to Cart: {book.title}_{i}"):
                 st.session_state.shopping_cart.append(book)
                 st.success(f"{book.title} added to cart!")
 
@@ -82,9 +82,9 @@ def main():
             bookstore = Bookstore()
             search_results = bookstore.search_book(search_query)
             if search_results:
-                for book in search_results:
+                for i, book in enumerate(search_results):
                     st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
-                    if st.button(f"Add to Cart: {book.title}"):
+                    if st.button(f"Add to Cart: {book.title}_{i}"):
                         st.session_state.shopping_cart.append(book)
                         st.success(f"{book.title} added to cart!")
             else:
