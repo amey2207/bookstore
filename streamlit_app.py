@@ -3,11 +3,26 @@ import random
 
 # Sample data for books
 books_data = [
-    {"title": "To Kill a Mockingbird", "author": "Harper Lee", "genre": "Fiction", "price": 10.99, "image_url": "https://images.pexels.com/photos/265158/pexels-photo-265158.jpeg"},
-    {"title": "1984", "author": "George Orwell", "genre": "Science Fiction", "price": 9.99, "image_url": "https://images.pexels.com/photos/5634323/pexels-photo-5634323.jpeg"},
-    {"title": "Pride and Prejudice", "author": "Jane Austen", "genre": "Romance", "price": 12.99, "image_url": "https://images.pexels.com/photos/894853/pexels-photo-894853.jpeg"},
-    {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "Classic", "price": 11.99, "image_url": "https://images.pexels.com/photos/1191635/pexels-photo-1191635.jpeg"},
-    # Add more books here...
+    {"title": "To Kill a Mockingbird", "author": "Harper Lee", "genre": "Fiction", "price": 10.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "1984", "author": "George Orwell", "genre": "Science Fiction", "price": 9.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Pride and Prejudice", "author": "Jane Austen", "genre": "Romance", "price": 12.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "Classic", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Moby-Dick", "author": "Herman Melville", "genre": "Classic", "price": 13.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Catcher in the Rye", "author": "J.D. Salinger", "genre": "Fiction", "price": 10.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Jane Eyre", "author": "Charlotte Bronte", "genre": "Romance", "price": 12.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Animal Farm", "author": "George Orwell", "genre": "Political Satire", "price": 9.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Frankenstein", "author": "Mary Shelley", "genre": "Gothic", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Lord of the Rings", "author": "J.R.R. Tolkien", "genre": "Fantasy", "price": 15.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Dracula", "author": "Bram Stoker", "genre": "Gothic Horror", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Hobbit", "author": "J.R.R. Tolkien", "genre": "Fantasy", "price": 14.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Odyssey", "author": "Homer", "genre": "Epic", "price": 12.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Picture of Dorian Gray", "author": "Oscar Wilde", "genre": "Gothic", "price": 10.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Wuthering Heights", "author": "Emily Bronte", "genre": "Gothic", "price": 12.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "War and Peace", "author": "Leo Tolstoy", "genre": "Historical Fiction", "price": 17.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Adventures of Huckleberry Finn", "author": "Mark Twain", "genre": "Adventure", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Crime and Punishment", "author": "Fyodor Dostoevsky", "genre": "Psychological Thriller", "price": 13.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Anna Karenina", "author": "Leo Tolstoy", "genre": "Romance", "price": 14.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Count of Monte Cristo", "author": "Alexandre Dumas", "genre": "Adventure", "price": 12.99, "image_url": "https://via.placeholder.com/150"}
 ]
 
 # Payment methods
@@ -55,11 +70,13 @@ class ShoppingCart:
         for i, item in enumerate(st.session_state.shopping_cart, 1):
             st.write(f"{i}. {item.title} by {item.author} - {item.genre} (${item.price})")
 
-    def place_order(self):
+    def place_order(self, card_details):
         total = sum(book.price for book in st.session_state.shopping_cart)
         st.write(f"Total amount to pay: ${total}")
         payment_method = st.selectbox("Select Payment Method", payment_methods)
         st.write(f"Payment method: {payment_method}")
+        st.write("Card Details:")
+        st.write(card_details)
         if st.button("Place Order"):
             st.write("Order placed successfully!")
             st.session_state.shopping_cart = []
@@ -98,7 +115,8 @@ def main():
         st.header("Shopping Cart")
         shopping_cart = ShoppingCart()
         shopping_cart.display_cart()
-        shopping_cart.place_order()
+        card_details = st.text_input("Enter your card details:")
+        shopping_cart.place_order(card_details)
 
 if __name__ == "__main__":
     main()
