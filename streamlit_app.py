@@ -1,5 +1,14 @@
 import streamlit as st
 
+# Sample data for books
+books_data = [
+    {"title": "To Kill a Mockingbird", "author": "Harper Lee", "genre": "Fiction", "price": 10.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "1984", "author": "George Orwell", "genre": "Science Fiction", "price": 9.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "Pride and Prejudice", "author": "Jane Austen", "genre": "Romance", "price": 12.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "Classic", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
+    # Add more books here...
+]
+
 class Book:
     def __init__(self, title, author, genre, price, image_url):
         self.title = title
@@ -26,19 +35,12 @@ class Bookstore:
             st.write("No books in the store yet!")
             return
         st.write("Books available in the store:")
-        num_books = len(self.books)
-        num_rows = (num_books + 3) // 4
-        for i in range(num_rows):
-            cols = st.columns(4)
-            for j in range(4):
-                idx = i * 4 + j
-                if idx < num_books:
-                    cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
-                    with cols[j]:
-                        if st.button(f"Add to Cart: {self.books[idx].title}"):
-                            st.session_state.shopping_cart.append(self.books[idx])
-                            st.experimental_set_query_params(view="cart")
-                            st.success(f"{self.books[idx].title} added to cart!")
+        for book in self.books:
+            st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
+            if st.button(f"Add to Cart: {book.title}"):
+                st.session_state.shopping_cart.append(book)
+                st.experimental_set_query_params(view="cart")
+                st.success(f"{book.title} added to cart!")
 
 class ShoppingCart:
     def __init__(self):
@@ -64,26 +66,32 @@ class ShoppingCart:
             st.write("Order canceled.")
 
 def main():
-    st.title("Bookstore")
+    st.title("Bookchor")
+
+    # Initialize shopping cart
+    if "shopping_cart" not in st.session_state:
+        st.session_state.shopping_cart = []
+
     page = st.experimental_get_query_params().get("view", ["home"])[0]
 
     if page == "search":
+        st.header("Search Books")
         search_query = st.text_input("Search for a book:")
         if st.button("Search"):
             # Search logic here
             pass
     elif page == "cart":
-        shopping_cart = ShoppingCart()
         st.header("Shopping Cart")
-        shopping_cart.display_cart()
-    elif page == "order":
         shopping_cart = ShoppingCart()
-        st.header("Place Your Order")
         shopping_cart.display_cart()
         if st.button("Place Order"):
             shopping_cart.place_order()
     else:
+        st.header("Welcome to Bookchor")
         bookstore = Bookstore()
+        for book_data in books_data:
+            book = Book(**book_data)
+            bookstore.add_book(book)
         bookstore.display_books()
 
     st.sidebar.markdown("## Menu")
@@ -93,8 +101,6 @@ def main():
         st.experimental_set_query_params(view="search")
     if st.sidebar.button("View Cart"):
         st.experimental_set_query_params(view="cart")
-    if st.sidebar.button("Place Order"):
-        st.experimental_set_query_params(view="order")
 
 if __name__ == "__main__":
     main()
