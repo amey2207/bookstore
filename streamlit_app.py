@@ -47,23 +47,23 @@ class Bookstore:
         results = self.books
         if title:
             results = [book for book in results if title.lower() in book.title.lower()]
-        if genre:
+        if genre and genre != "All":
             results = [book for book in results if genre.lower() == book.genre.lower()]
         return results
 
-    def display_books(self):
+    def display_books(self, books):
         st.write("Books available in the store:")
-        num_books = len(self.books)
+        num_books = len(books)
         num_rows = (num_books + 3) // 4
         for i in range(num_rows):
             cols = st.columns(4)
             for j in range(4):
                 idx = i * 4 + j
                 if idx < num_books:
-                    cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
-                    if cols[j].button(f"Add to Cart: {self.books[idx].title}_{i}"):
-                        st.session_state.shopping_cart.append(self.books[idx])
-                        st.success(f"{self.books[idx].title} added to cart!")
+                    cols[j].image(books[idx].image_url, caption=f"{books[idx].title} by {books[idx].author} - {books[idx].genre} (${books[idx].price})", use_column_width=True)
+                    if cols[j].button(f"Add to Cart: {books[idx].title}_{i}"):
+                        st.session_state.shopping_cart.append(books[idx])
+                        st.success(f"{books[idx].title} added to cart!")
 
 class ShoppingCart:
     def __init__(self):
@@ -118,20 +118,16 @@ def main():
         for data in books_data:
             book = Book(**data)
             bookstore.add_book(book)
-        bookstore.display_books()
+        bookstore.display_books(books_data)
     elif page == "Search":
         st.header("Search Books")
         search_query = st.text_input("Search by title:")
         genre = st.selectbox("Filter by genre:", ["All"] + list(set(book['genre'] for book in books_data)))
         if st.button("Search"):
             bookstore = Bookstore()
-            search_results = bookstore.search_book(search_query, genre if genre != "All" else None)
+            search_results = bookstore.search_book(search_query, genre)
             if search_results:
-                for i, book in enumerate(search_results):
-                    st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
-                    if st.button(f"Add to Cart: {book.title}_{i}"):
-                        st.session_state.shopping_cart.append(book)
-                        st.success(f"{book.title} added to cart!")
+                bookstore.display_books(search_results)
             else:
                 st.write("No books found.")
     elif page == "Cart":
