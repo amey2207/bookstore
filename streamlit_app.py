@@ -1,5 +1,4 @@
 import streamlit as st
-import random
 
 # Sample data for books
 books_data = [
@@ -60,10 +59,10 @@ class Bookstore:
             for j in range(4):
                 idx = i * 4 + j
                 if idx < num_books:
-                    cols[j].image(books[idx]["image_url"], caption=f"{books[idx]['title']} by {books[idx]['author']} - {books[idx]['genre']} (${books[idx]['price']})", use_column_width=True)
-                    if cols[j].button(f"Add to Cart: {books[idx]['title']}_{i}"):
+                    cols[j].image(books[idx].image_url, caption=f"{books[idx].title} by {books[idx].author} - {books[idx].genre} (${books[idx].price})", use_column_width=True)
+                    if cols[j].button(f"Add to Cart: {books[idx].title}_{i}"):
                         st.session_state.shopping_cart.append(books[idx])
-                        st.success(f"{books[idx]['title']} added to cart!")
+                        st.success(f"{books[idx].title} added to cart!")
 
 class ShoppingCart:
     def __init__(self):
@@ -73,10 +72,10 @@ class ShoppingCart:
     def display_cart(self):
         st.write("Items in your cart:")
         for i, item in enumerate(st.session_state.shopping_cart, 1):
-            st.write(f"{i}. {item['title']} by {item['author']} - {item['genre']} (${item['price']})")
+            st.write(f"{i}. {item.title} by {item.author} - {item.genre} (${item.price})")
 
     def place_order(self, card_details):
-        total = sum(book['price'] for book in st.session_state.shopping_cart)
+        total = sum(book.price for book in st.session_state.shopping_cart)
         st.write(f"Total amount to pay: ${total}")
         st.write("Payment Method:")
         payment_method = st.radio("Select Payment Method", payment_methods)
@@ -118,11 +117,11 @@ def main():
         for data in books_data:
             book = Book(**data)
             bookstore.add_book(book)
-        bookstore.display_books(books_data)
+        bookstore.display_books(bookstore.books)
     elif page == "Search":
         st.header("Search Books")
         search_query = st.text_input("Search by title:")
-        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book['genre'] for book in books_data)))
+        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book.genre for book in books_data)))
         if st.button("Search"):
             bookstore = Bookstore()
             search_results = bookstore.search_book(search_query, genre)
