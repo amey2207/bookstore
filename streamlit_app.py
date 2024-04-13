@@ -43,8 +43,13 @@ class Bookstore:
     def add_book(self, book):
         self.books.append(book)
 
-    def search_book(self, title):
-        return [book for book in self.books if title.lower() in book.title.lower()]
+    def search_book(self, title, genre):
+        results = self.books
+        if title:
+            results = [book for book in results if title.lower() in book.title.lower()]
+        if genre:
+            results = [book for book in results if genre.lower() == book.genre.lower()]
+        return results
 
     def display_books(self):
         st.write("Books available in the store:")
@@ -56,7 +61,7 @@ class Bookstore:
                 idx = i * 4 + j
                 if idx < num_books:
                     cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
-                    if cols[j].button(f"Add to Cart: {self.books[idx].title}"):
+                    if cols[j].button(f"Add to Cart: {self.books[idx].title}_{i}"):
                         st.session_state.shopping_cart.append(self.books[idx])
                         st.success(f"{self.books[idx].title} added to cart!")
 
@@ -116,10 +121,11 @@ def main():
         bookstore.display_books()
     elif page == "Search":
         st.header("Search Books")
-        search_query = st.text_input("Search for a book:")
+        search_query = st.text_input("Search by title:")
+        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book['genre'] for book in books_data)))
         if st.button("Search"):
             bookstore = Bookstore()
-            search_results = bookstore.search_book(search_query)
+            search_results = bookstore.search_book(search_query, genre if genre != "All" else None)
             if search_results:
                 for i, book in enumerate(search_results):
                     st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
