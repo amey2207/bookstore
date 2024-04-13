@@ -26,20 +26,15 @@ class Bookstore:
             st.write("No books in the store yet!")
             return
         st.write("Books available in the store:")
-        for book in self.books:
-            st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})",
-                     use_column_width=True)
-            col1, col2 = st.columns(2)
-            with col1:
-                button_id = f"add_to_cart_{book.title}"
-                if st.button("Add to Cart", key=button_id):
-                    st.success("Book added to cart!")
-                    # Add to cart logic here
-            with col2:
-                button_id = f"buy_now_{book.title}"
-                if st.button("Buy Now", key=button_id):
-                    st.success("You bought the book!")
-                    # Buy now logic here
+        num_books = len(self.books)
+        num_rows = (num_books + 3) // 4
+        for i in range(num_rows):
+            with st.expander(f"Row {i+1}"):
+                cols = st.columns(4)
+                for j in range(4):
+                    idx = i * 4 + j
+                    if idx < num_books:
+                        cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
 
 class ShoppingCart:
     def __init__(self):
