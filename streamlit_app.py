@@ -29,29 +29,15 @@ class Bookstore:
         self.books.append(book)
 
     def search_book(self, title):
-        for book in self.books:
-            if book.title.lower() == title.lower():
-                return book
-        return None
+        return [book for book in self.books if title.lower() in book.title.lower()]
 
     def display_books(self):
-        if not self.books:
-            st.write("No books in the store yet!")
-            return
         st.write("Books available in the store:")
-        num_books = len(self.books)
-        num_rows = (num_books + 3) // 4
-        for i in range(num_rows):
-            cols = st.columns(4)
-            for j in range(4):
-                idx = i * 4 + j
-                if idx < num_books:
-                    cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
-                    with cols[j]:
-                        if st.button(f"Add to Cart: {self.books[idx].title}"):
-                            st.session_state.shopping_cart.append(self.books[idx])
-                            st.experimental_set_query_params(view="cart")
-                            st.success(f"{self.books[idx].title} added to cart!")
+        for book in self.books:
+            st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
+            if st.button(f"Add to Cart: {book.title}"):
+                st.session_state.shopping_cart.append(book)
+                st.success(f"{book.title} added to cart!")
 
 class ShoppingCart:
     def __init__(self):
@@ -59,9 +45,6 @@ class ShoppingCart:
             st.session_state.shopping_cart = []
 
     def display_cart(self):
-        if not st.session_state.shopping_cart:
-            st.write("Your cart is empty!")
-            return
         st.write("Items in your cart:")
         for i, item in enumerate(st.session_state.shopping_cart, 1):
             st.write(f"{i}. {item.title} by {item.author} - {item.genre} (${item.price})")
@@ -82,35 +65,35 @@ def main():
     if "shopping_cart" not in st.session_state:
         st.session_state.shopping_cart = []
 
-    page = st.experimental_get_query_params().get("view", ["home"])[0]
+    page = st.sidebar.selectbox("Menu", ["Home", "Search", "Cart"])
 
-    if page == "search":
-        st.header("Search Books")
-        search_query = st.text_input("Search for a book:")
-        if st.button("Search"):
-            # Search logic here
-            pass
-    elif page == "cart":
-        st.header("Shopping Cart")
-        shopping_cart = ShoppingCart()
-        shopping_cart.display_cart()
-        shopping_cart.place_order()  # Display place order option
-    else:
+    if page == "Home":
         st.header("Welcome to Bookstore")
         bookstore = Bookstore()
-        for _ in range(20):
+        for _ in range(10):
             book_data = random.choice(books_data)
             book = Book(**book_data)
             bookstore.add_book(book)
         bookstore.display_books()
-
-    st.sidebar.markdown("## Menu")
-    if st.sidebar.button("Home"):
-        st.experimental_set_query_params(view="home")
-    if st.sidebar.button("Search"):
-        st.experimental_set_query_params(view="search")
-    if st.sidebar.button("View Cart"):
-        st.experimental_set_query_params(view="cart")
+    elif page == "Search":
+        st.header("Search Books")
+        search_query = st.text_input("Search for a book:")
+        if st.button("Search"):
+            bookstore = Bookstore()
+            search_results = bookstore.search_book(search_query)
+            if search_results:
+                for book in search_results:
+                    st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
+                    if st.button(f"Add to Cart: {book.title}"):
+                        st.session_state.shopping_cart.append(book)
+                        st.success(f"{book.title} added to cart!")
+            else:
+                st.write("No books found.")
+    elif page == "Cart":
+        st.header("Shopping Cart")
+        shopping_cart = ShoppingCart()
+        shopping_cart.display_cart()
+        shopping_cart.place_order()
 
 if __name__ == "__main__":
     main()
