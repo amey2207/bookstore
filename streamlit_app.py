@@ -121,7 +121,7 @@ def main():
     elif page == "Search":
         st.header("Search Books")
         search_query = st.text_input("Search by title:")
-        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book.genre for book in books_data)))
+        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book['genre'] for book in books_data)))
         if st.button("Search"):
             bookstore = Bookstore()
             search_results = bookstore.search_book(search_query, genre)
