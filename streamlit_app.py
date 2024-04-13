@@ -34,6 +34,12 @@ class Bookstore:
                 idx = i * 4 + j
                 if idx < num_books:
                     cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
+                    if st.button(f"Add to Cart: {self.books[idx].title}"):
+                        st.success(f"{self.books[idx].title} added to cart!")
+                        # Add to cart logic here
+                    if st.button(f"Buy Now: {self.books[idx].title}"):
+                        st.success(f"You bought {self.books[idx].title}!")
+                        # Buy now logic here
 
 class ShoppingCart:
     def __init__(self):
@@ -95,7 +101,7 @@ def main():
     st.write("Books available in the store:")
     bookstore.display_books()
 
-    option = st.sidebar.selectbox("Menu", ["View Cart", "Place Order"])
+    option = st.sidebar.selectbox("Menu", ["Home", "Search", "View Cart", "Place Order"])
 
     if option == "View Cart":
         st.header("Shopping Cart")
