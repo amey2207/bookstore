@@ -31,11 +31,13 @@ class Bookstore:
                      use_column_width=True)
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("Add to Cart"):
+                button_id = f"add_to_cart_{book.title}"
+                if st.button("Add to Cart", key=button_id):
                     st.success("Book added to cart!")
                     # Add to cart logic here
             with col2:
-                if st.button("Buy Now"):
+                button_id = f"buy_now_{book.title}"
+                if st.button("Buy Now", key=button_id):
                     st.success("You bought the book!")
                     # Buy now logic here
 
