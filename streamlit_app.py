@@ -3,10 +3,10 @@ import random
 
 # Sample data for books
 books_data = [
-    {"title": "To Kill a Mockingbird", "author": "Harper Lee", "genre": "Fiction", "price": 10.99, "image_url": "https://via.placeholder.com/150"},
-    {"title": "1984", "author": "George Orwell", "genre": "Science Fiction", "price": 9.99, "image_url": "https://via.placeholder.com/150"},
-    {"title": "Pride and Prejudice", "author": "Jane Austen", "genre": "Romance", "price": 12.99, "image_url": "https://via.placeholder.com/150"},
-    {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "Classic", "price": 11.99, "image_url": "https://via.placeholder.com/150"},
+    {"title": "To Kill a Mockingbird", "author": "Harper Lee", "genre": "Fiction", "price": 10.99, "image_url": "https://images.pexels.com/photos/265158/pexels-photo-265158.jpeg"},
+    {"title": "1984", "author": "George Orwell", "genre": "Science Fiction", "price": 9.99, "image_url": "https://images.pexels.com/photos/5634323/pexels-photo-5634323.jpeg"},
+    {"title": "Pride and Prejudice", "author": "Jane Austen", "genre": "Romance", "price": 12.99, "image_url": "https://images.pexels.com/photos/894853/pexels-photo-894853.jpeg"},
+    {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "genre": "Classic", "price": 11.99, "image_url": "https://images.pexels.com/photos/1191635/pexels-photo-1191635.jpeg"},
     # Add more books here...
 ]
 
@@ -33,11 +33,17 @@ class Bookstore:
 
     def display_books(self):
         st.write("Books available in the store:")
-        for i, book in enumerate(self.books):
-            st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})", use_column_width=True)
-            if st.button(f"Add to Cart: {book.title}_{i}"):
-                st.session_state.shopping_cart.append(book)
-                st.success(f"{book.title} added to cart!")
+        num_books = len(self.books)
+        num_rows = (num_books + 3) // 4
+        for i in range(num_rows):
+            cols = st.columns(4)
+            for j in range(4):
+                idx = i * 4 + j
+                if idx < num_books:
+                    cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
+                    if cols[j].button(f"Add to Cart: {self.books[idx].title}"):
+                        st.session_state.shopping_cart.append(self.books[idx])
+                        st.success(f"{self.books[idx].title} added to cart!")
 
 class ShoppingCart:
     def __init__(self):
@@ -70,9 +76,8 @@ def main():
     if page == "Home":
         st.header("Welcome to Bookstore")
         bookstore = Bookstore()
-        for _ in range(10):
-            book_data = random.choice(books_data)
-            book = Book(**book_data)
+        for data in books_data:
+            book = Book(**data)
             bookstore.add_book(book)
         bookstore.display_books()
     elif page == "Search":
