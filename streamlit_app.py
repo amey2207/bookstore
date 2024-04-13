@@ -94,17 +94,6 @@ class ShoppingCart:
 def main():
     st.set_page_config(page_title="Bookstore App", page_icon=":books:", layout="wide")
 
-    # Background styling
-    page_bg_img = '''
-    <style>
-    body {
-    background-image: url("https://images.pexels.com/photos/6319887/pexels-photo-6319887.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260");
-    background-size: cover;
-    }
-    </style>
-    '''
-    st.markdown(page_bg_img, unsafe_allow_html=True)
-
     # Initialize shopping cart
     if "shopping_cart" not in st.session_state:
         st.session_state.shopping_cart = []
