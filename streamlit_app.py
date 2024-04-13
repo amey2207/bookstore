@@ -36,34 +36,29 @@ class Bookstore:
                     cols[j].image(self.books[idx].image_url, caption=f"{self.books[idx].title} by {self.books[idx].author} - {self.books[idx].genre} (${self.books[idx].price})", use_column_width=True)
                     with cols[j]:
                         if st.button(f"Add to Cart: {self.books[idx].title}"):
+                            st.session_state.shopping_cart.append(self.books[idx])
                             st.success(f"{self.books[idx].title} added to cart!")
-                            # Add to cart logic here
-                        if st.button(f"Buy Now: {self.books[idx].title}"):
-                            st.success(f"You bought {self.books[idx].title}!")
-                            # Buy now logic here
 
 class ShoppingCart:
     def __init__(self):
-        self.items = []
-
-    def add_to_cart(self, book):
-        self.items.append(book)
+        if "shopping_cart" not in st.session_state:
+            st.session_state.shopping_cart = []
 
     def display_cart(self):
-        if not self.items:
+        if not st.session_state.shopping_cart:
             st.write("Your cart is empty!")
             return
         st.write("Items in your cart:")
-        for i, item in enumerate(self.items, 1):
+        for i, item in enumerate(st.session_state.shopping_cart, 1):
             st.write(f"{i}. {item.title} by {item.author} - {item.genre} (${item.price})")
 
     def place_order(self):
-        total = sum(book.price for book in self.items)
+        total = sum(book.price for book in st.session_state.shopping_cart)
         st.write(f"Total amount to pay: ${total}")
         confirm = st.radio("Confirm order?", ("Yes", "No"))
         if confirm == "Yes":
             st.write("Order placed successfully!")
-            self.items = []
+            st.session_state.shopping_cart = []
         else:
             st.write("Order canceled.")
 
@@ -94,7 +89,7 @@ def main():
         if book:
             st.write(f"{book.title} by {book.author} - {book.genre} (${book.price})")
             if st.button("Add to Cart"):
-                shopping_cart.add_to_cart(book)
+                st.session_state.shopping_cart.append(book)
                 st.success("Book added to cart!")
         else:
             st.error("Book not found!")
