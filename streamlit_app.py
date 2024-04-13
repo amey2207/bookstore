@@ -1,11 +1,12 @@
 import streamlit as st
 
 class Book:
-    def __init__(self, title, author, genre, price):
+    def __init__(self, title, author, genre, price, image_url):
         self.title = title
         self.author = author
         self.genre = genre
         self.price = price
+        self.image_url = image_url
 
 class Bookstore:
     def __init__(self):
@@ -25,8 +26,18 @@ class Bookstore:
             st.write("No books in the store yet!")
             return
         st.write("Books available in the store:")
-        for i, book in enumerate(self.books, 1):
-            st.write(f"{i}. {book.title} by {book.author} - {book.genre} (${book.price})")
+        for book in self.books:
+            st.image(book.image_url, caption=f"{book.title} by {book.author} - {book.genre} (${book.price})",
+                     use_column_width=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Add to Cart"):
+                    st.success("Book added to cart!")
+                    # Add to cart logic here
+            with col2:
+                if st.button("Buy Now"):
+                    st.success("You bought the book!")
+                    # Buy now logic here
 
 class ShoppingCart:
     def __init__(self):
@@ -58,39 +69,17 @@ def main():
     shopping_cart = ShoppingCart()
 
     # Adding sample books
-    bookstore.add_book(Book("To Kill a Mockingbird", "Harper Lee", "Fiction", 10.99))
-    bookstore.add_book(Book("1984", "George Orwell", "Science Fiction", 9.99))
-    bookstore.add_book(Book("Pride and Prejudice", "Jane Austen", "Romance", 12.99))
+    bookstore.add_book(Book("To Kill a Mockingbird", "Harper Lee", "Fiction", 10.99, "https://via.placeholder.com/150"))
+    bookstore.add_book(Book("1984", "George Orwell", "Science Fiction", 9.99, "https://via.placeholder.com/150"))
+    bookstore.add_book(Book("Pride and Prejudice", "Jane Austen", "Romance", 12.99, "https://via.placeholder.com/150"))
 
     st.title("Bookstore")
 
-    option = st.sidebar.selectbox("Menu", ["Home", "Search", "View Cart", "Place Order"])
+    option = st.sidebar.selectbox("Menu", ["Home", "View Cart", "Place Order"])
 
     if option == "Home":
         st.write("Welcome to the Bookstore!")
-        st.write("Check out these featured books:")
         bookstore.display_books()
-    elif option == "Search":
-        st.header("Search for a Book")
-        search_options = ["Title", "Author", "Genre"]
-        search_type = st.selectbox("Search by", search_options)
-        query = st.text_input(f"Enter the {search_type.lower()} of the book you want to search for:")
-        if st.button("Search"):
-            if search_type == "Title":
-                book = bookstore.search_book(query)
-                if book:
-                    st.write(f"{book.title} by {book.author} - {book.genre} (${book.price})")
-                    if st.button("Add to Cart"):
-                        shopping_cart.add_to_cart(book)
-                        st.success("Book added to cart!")
-                else:
-                    st.error("Book not found!")
-            elif search_type == "Author":
-                # Search by author logic
-                pass
-            elif search_type == "Genre":
-                # Search by genre logic
-                pass
     elif option == "View Cart":
         st.header("Shopping Cart")
         shopping_cart.display_cart()
