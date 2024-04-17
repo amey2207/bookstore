@@ -1,100 +1,85 @@
 import streamlit as st
-import pymongo
+import sqlite3
 
-# Payment methods
-payment_methods = ["Credit Card", "Debit Card", "PayPal"]
+# Create or connect to the SQLite database
+conn = sqlite3.connect('bookstore.db')
+c = conn.cursor()
 
-class Bookstore:
-    def __init__(self, db_client):
-        self.db = db_client["bookstore"]
-        self.collection = self.db["books"]
+# Create a table to store books if it doesn't exist already
+c.execute('''CREATE TABLE IF NOT EXISTS books
+             (title TEXT, author TEXT, genre TEXT, price REAL, image_url TEXT)''')
 
-    def add_book(self, book_data):
-        self.collection.insert_one(book_data)
+# Sample data for books
+books_data = [
+    ("To Kill a Mockingbird", "Harper Lee", "Fiction", 10.99, "https://images.pexels.com/photos/265158/pexels-photo-265158.jpeg"),
+    ("1984", "George Orwell", "Science Fiction", 9.99, "https://images.pexels.com/photos/5634323/pexels-photo-5634323.jpeg"),
+    ("Pride and Prejudice", "Jane Austen", "Romance", 12.99, "https://images.pexels.com/photos/894853/pexels-photo-894853.jpeg"),
+    # Add more books here
+]
 
-    def search_book(self, title, genre):
-        query = {}
-        if title:
-            query["title"] = {"$regex": title, "$options": "i"}
-        if genre and genre != "All":
-            query["genre"] = {"$regex": genre, "$options": "i"}
-        return list(self.collection.find(query))
+# Function to add books to the database
+def add_books_to_db(books):
+    c.executemany('INSERT INTO books VALUES (?, ?, ?, ?, ?)', books)
+    conn.commit()
 
-    def display_books(self, books):
-        st.write("Books available in the store:")
-        num_books = len(books)
-        num_rows = (num_books + 3) // 4
-        for i in range(num_rows):
-            cols = st.columns(4)
-            for j in range(4):
-                idx = i * 4 + j
-                if idx < num_books:
-                    cols[j].image(books[idx]["image_url"], caption=f"{books[idx]['title']} by {books[idx]['author']} - {books[idx]['genre']} (${books[idx]['price']})", use_column_width=True)
-                    if cols[j].button(f"Add to Cart: {books[idx]['title']}_{i}"):
-                        st.session_state.shopping_cart.append(books[idx])
-                        st.success(f"{books[idx]['title']} added to cart!")
+# Function to fetch books from the database
+def fetch_books_from_db(title=None, genre=None):
+    if title:
+        query = f"SELECT * FROM books WHERE title LIKE '%{title}%'"
+    elif genre:
+        query = f"SELECT * FROM books WHERE genre='{genre}'"
+    else:
+        query = "SELECT * FROM books"
+    return c.execute(query).fetchall()
 
-class ShoppingCart:
-    def __init__(self):
-        if "shopping_cart" not in st.session_state:
-            st.session_state.shopping_cart = []
+# Function to display books in Streamlit
+def display_books(books):
+    st.write("Books available in the store:")
+    num_books = len(books)
+    num_rows = (num_books + 3) // 4
+    for i in range(num_rows):
+        cols = st.columns(4)
+        for j in range(4):
+            idx = i * 4 + j
+            if idx < num_books:
+                book = books[idx]
+                cols[j].image(book[4], caption=f"{book[0]} by {book[1]} - {book[2]} (${book[3]})", use_column_width=True)
+                if cols[j].button(f"Add to Cart: {book[0]}_{idx}"):
+                    st.session_state.shopping_cart.append(book)
+                    st.success(f"{book[0]} added to cart!")
 
-    def display_cart(self):
-        st.write("Items in your cart:")
-        for i, item in enumerate(st.session_state.shopping_cart, 1):
-            st.write(f"{i}. {item['title']} by {item['author']} - {item['genre']} (${item['price']})")
+# Initialize shopping cart
+if "shopping_cart" not in st.session_state:
+    st.session_state.shopping_cart = []
 
-    def place_order(self, card_details):
-        total = sum(book['price'] for book in st.session_state.shopping_cart)
-        st.write(f"Total amount to pay: ${total}")
-        st.write("Payment Method:")
-        payment_method = st.radio("Select Payment Method", payment_methods)
-        st.write(f"Payment method: {payment_method}")
+# Add sample books to the database
+add_books_to_db(books_data)
 
-        st.write("Card Details:")
-        card_number = st.text_input("Card Number")
-        exp_date, cvv = st.columns(2)
-        expiry_date = exp_date.text_input("Expiry Date", max_chars=5)
-        cvv_code = cvv.text_input("CVV", max_chars=3)
-
-        if st.button("Place Order"):
-            st.write("Order placed successfully!")
-            st.session_state.shopping_cart = []
-
+# Main function
 def main():
-    # Connect to MongoDB
-    db_client = pymongo.MongoClient("mongodb://localhost:27017/")
-
     st.set_page_config(page_title="Bookstore App", page_icon=":books:", layout="wide")
-
-    # Initialize shopping cart
-    if "shopping_cart" not in st.session_state:
-        st.session_state.shopping_cart = []
 
     page = st.sidebar.selectbox("Menu", ["Home", "Search", "Cart"])
 
     if page == "Home":
         st.header("Welcome to Bookstore")
-        bookstore = Bookstore(db_client)
-        books = bookstore.search_book(None, "All")
-        bookstore.display_books(books)
+        books = fetch_books_from_db()
+        display_books(books)
     elif page == "Search":
         st.header("Search Books")
         search_query = st.text_input("Search by title:")
-        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book['genre'] for book in bookstore.search_book(None, "All"))))
+        genre = st.selectbox("Filter by genre:", ["All"] + list(set(book[2] for book in books_data)))
         if st.button("Search"):
-            bookstore = Bookstore(db_client)
-            search_results = bookstore.search_book(search_query, genre)
-            if search_results:
-                bookstore.display_books(search_results)
+            books = fetch_books_from_db(title=search_query, genre=genre)
+            if books:
+                display_books(books)
             else:
                 st.write("No books found.")
     elif page == "Cart":
         st.header("Shopping Cart")
-        shopping_cart = ShoppingCart()
-        shopping_cart.display_cart()
-        card_details = st.empty()
-        shopping_cart.place_order(card_details)
+        st.write("Items in your cart:")
+        for i, item in enumerate(st.session_state.shopping_cart, 1):
+            st.write(f"{i}. {item[0]} by {item[1]} - {item[2]} (${item[3]})")
 
 if __name__ == "__main__":
     main()
